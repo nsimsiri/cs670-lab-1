@@ -1,5 +1,7 @@
 
 public class Peer implements ITradable {
+    public Peer(){}
+    
     @Override
     public void lookup(String productName, int hopCount) {
 
@@ -16,6 +18,10 @@ public class Peer implements ITradable {
     }
 
     public void run() {
+
+    }
+
+    public static void main(String[] args){
 
     }
 }
