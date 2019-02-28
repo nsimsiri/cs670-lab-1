@@ -5,6 +5,9 @@ import java.util.Map;
 
 /***
  * Abstraction for inventory/product bookkeeping.
+ * Requirements:
+ *  - Each seller starts with n items (e.g., n boars) to sell; upon selling all n items,
+ *  the seller picks another item at random and becomes a seller of that item.
  */
 public class Inventory {
     private Map<String, Integer> inventoryMap;

@@ -8,18 +8,20 @@ public interface ITradable extends Remote{
      * @param productName
      * @param hopCount
      */
-    void lookup(String productName, int hopCount)throws RemoteException;
+    void lookup(String productName, int hopCount) throws RemoteException;
 
     /***
      * this is a reply message with the peerID of the seller
      * @param sellerID
      */
-    void reply(Long sellerID)throws RemoteException;
+    void reply(Long sellerID) throws RemoteException;
 
     /***
      *  if multiple sellers respond, the buyer picks one at random, and contacts it directly with the buy message.
      *  A buy causes the seller to decrement the number of items in stock.
      * @param peerID
      */
-    void buy(Long peerID)throws RemoteException;
+    void buy(Long peerID) throws RemoteException;
+
+    String getName() throws RemoteException;
 }
