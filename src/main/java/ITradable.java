@@ -1,4 +1,6 @@
-public interface ITradable {
+import java.rmi.Remote;
+
+public interface ITradable extends Remote {
 
     /***
      * this procedure should search the network; all matching sellers respond to this
