@@ -15,7 +15,8 @@ public class Peer implements ITradable {
 
     }
 
-    public void run(){
-        
+    public void run() {
+
     }
+}
 
