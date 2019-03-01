@@ -2,6 +2,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Stack;
 
 /***
  * Both Server and Client
@@ -20,7 +21,7 @@ public class Peer extends UnicastRemoteObject implements ITradable {
     }
     
     @Override
-    public synchronized void lookup(String productName, int hopCount) {
+    public synchronized void lookup(String productName, int hopCount, Stack<String> stack) {
     }
 
     /***
@@ -28,7 +29,7 @@ public class Peer extends UnicastRemoteObject implements ITradable {
      * @param sellerID
      */
     @Override
-    public synchronized void reply(Long sellerID) {
+    public synchronized void reply(Long sellerID, Stack<String> stack) {
     }
 
     /***
