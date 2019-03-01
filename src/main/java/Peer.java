@@ -1,17 +1,12 @@
-import sun.security.krb5.Config;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.rmi.Naming;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import java.util.Stack;
 
 /***
  * Both Server and Client
@@ -30,7 +25,7 @@ public class Peer implements ITradable {
     }
     
     @Override
-    public synchronized void lookup(String productName, int hopCount) {
+    public synchronized void lookup(String productName, int hopCount, Stack<String> stack) {
     }
 
     /***
@@ -38,8 +33,8 @@ public class Peer implements ITradable {
      * @param sellerID
      */
     @Override
-    public synchronized void reply(Long sellerID) {
 
+    public synchronized void reply(Long sellerID, Stack<String> stack){
     }
 
     /***
