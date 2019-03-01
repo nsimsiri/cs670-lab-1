@@ -1,4 +1,5 @@
-import java.util.List;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 public class ConfigService {
@@ -8,11 +9,22 @@ public class ConfigService {
         return INVENTORY_COUNT;
     }
 
-    public Properties ipConfig() {
+    public static Properties ipConfig() {
+        String path = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "tpalaschak_config.txt";
+        //String path = "tpalaschak_config.txt";
         Properties prop = new Properties();
+        try {
+            prop.load(new FileInputStream(path));
+            return prop;
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
         return prop;
     }
 
     public void getNeighbors(){
+        //List list = new List();
+        //return list;
     }
 }
