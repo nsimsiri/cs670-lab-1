@@ -1,7 +1,4 @@
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /***
  * Abstraction for inventory/product bookkeeping.
@@ -10,21 +7,28 @@ import java.util.Map;
  *  the seller picks another item at random and becomes a seller of that item.
  */
 public class Inventory {
-    private Map<String, Integer> inventoryMap;
-
-    public Inventory(int n){
-        this.inventoryMap = new HashMap<>();
-        List<String> productList = Arrays.asList("boar", "salt", "fish");
-        for(String product : productList){
-            this.inventoryMap.put(product, n);
-        }
+    private Map<ItemType, Integer> inventoryMap;
+    private final static List<ItemType> productList = Arrays.asList(ItemType.values());
+    public Inventory(ItemType itemType){
+        this.resetToItemType(itemType);
     }
 
     public Inventory(){
-        this(0);
+        ItemType itemType = randomizeItemType();
+        this.resetToItemType(itemType);
     }
 
-    public boolean take(String product){
+    public synchronized boolean isSellingItem(ItemType itemType){
+        return getSellingItem().equals(itemType);
+    }
+
+    public synchronized ItemType getSellingItem(){
+        if (this.inventoryMap.keySet().size() == 0) return null;
+        return this.inventoryMap.keySet().iterator().next();
+
+    }
+
+    public boolean take(ItemType product){
         if (!this.inventoryMap.containsKey(product) || this.inventoryMap.get(product) <= 0){
             return false;
         }
@@ -32,7 +36,7 @@ public class Inventory {
         return true;
     }
 
-    public boolean add(String product){
+    public synchronized  boolean add(ItemType product){
         if (!this.inventoryMap.containsKey(product)){
             return false;
         }
@@ -41,12 +45,29 @@ public class Inventory {
         return true;
     }
 
+    public synchronized void resetToItemType(ItemType itemType){
+        this.inventoryMap = new HashMap<>();
+        this.inventoryMap.put(itemType, ConfigService.getInstance().getInventoryCount());
+    }
+
+    public ItemType randomizeItemType(){
+        int i = new Random().nextInt(Inventory.productList.size());
+        return Inventory.productList.get(i);
+    }
+
+    @Override
+    public String toString(){
+        ItemType key = getSellingItem();
+        if (key == null) return "Inventory[Empty]";
+        return String.format("Inventory[%s = %s]", key, this.inventoryMap.getOrDefault(key, null));
+    }
+
     public static Inventory buildInventoryForPeerType(PeerType type){
 
         if (type.equals(PeerType.BUYER)){
             return new Inventory();
         } else if (type.equals(PeerType.SELLER)){
-            return new Inventory(ConfigService.getInstance().getInventoryCount());
+            return new Inventory();
         } else {
             throw new IllegalArgumentException("Unable to handle PeerType:" + type);
         }
