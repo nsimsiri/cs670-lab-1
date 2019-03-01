@@ -1,17 +1,25 @@
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Properties;
 
 /***
  * Both Server and Client
  * Two ideas on peer communication.
  * - (1) each peer holds a thread
  */
-public class Peer extends UnicastRemoteObject implements ITradable {
+public class Peer implements ITradable {
     private String name;
     private Logger logger;
     private final static Logger staticLogger = new Logger(Peer.class.getSimpleName());
+
+
 
     public Peer () throws RemoteException {}
     public Peer(String name) throws RemoteException {
@@ -29,6 +37,7 @@ public class Peer extends UnicastRemoteObject implements ITradable {
      */
     @Override
     public synchronized void reply(Long sellerID) {
+
     }
 
     /***
@@ -37,22 +46,21 @@ public class Peer extends UnicastRemoteObject implements ITradable {
      */
     @Override
     public synchronized void buy(Long peerID) {
-    }
-
-    public String greet(String peerID){
-        return "hello " + peerID;
+        logger.info("greetings from " + peerID);
     }
 
 
-    public static void build(String name){
+    public static void build(Registry registry, String name){
         try {
-            Peer server = new Peer(name);
-            ITradable serverStub = (ITradable) UnicastRemoteObject.exportObject(server, 0);
+            ITradable server = new Peer(name);
+            ITradable serverStub = (ITradable) UnicastRemoteObject.exportObject(server, 8002);
+//            String hardName = String.format("//128.119.202.183/"+name);
+            staticLogger.info("starting peer... " + name);
 
-            Registry registry = LocateRegistry.getRegistry();
             registry.bind(name, serverStub);
-
+            staticLogger.info("node server initiated");
         } catch (Exception e){
+
             e.printStackTrace();
             staticLogger.severe(e.getMessage());
         }
@@ -62,7 +70,18 @@ public class Peer extends UnicastRemoteObject implements ITradable {
         return this.name;
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws RemoteException, IOException {
+//        Properties p = new Properties();
+        staticLogger.info(Registry.REGISTRY_PORT);
+        Registry registry;
+        try {
+            registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
+            staticLogger.info("properly created registry");
+        } catch(Exception e){
+            staticLogger.warning("rebooting registry");
+            registry = LocateRegistry.getRegistry();
+        }
+        Peer.build(registry, "A");
 
     }
 }

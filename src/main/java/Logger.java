@@ -21,14 +21,14 @@ public class Logger {
     }
 
     public void info(Object in, Object... params){
-        System.out.println(color(in, ANSI_GREEN, params));
+        System.out.print(color(in, ANSI_GREEN, params));
     }
 
     public void warning(Object in, Object... params){
-        System.out.println(color(in, ANSI_YELLOW, params));
+        System.out.print(color(in, ANSI_YELLOW, params));
     }
 
     public void severe(Object in, Object... params){
-        System.out.println(color(in, ANSI_RED, params));
+        System.out.print(color(in, ANSI_RED, params));
     }
 }

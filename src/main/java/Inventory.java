@@ -24,7 +24,7 @@ public class Inventory {
         this(0);
     }
 
-    public synchronized boolean take(String product){
+    public boolean take(String product){
         if (!this.inventoryMap.containsKey(product) || this.inventoryMap.get(product) <= 0){
             return false;
         }
@@ -32,7 +32,7 @@ public class Inventory {
         return true;
     }
 
-    public synchronized boolean add(String product){
+    public boolean add(String product){
         if (!this.inventoryMap.containsKey(product)){
             return false;
         }
@@ -42,6 +42,7 @@ public class Inventory {
     }
 
     public static Inventory buildInventoryForPeerType(PeerType type){
+
         if (type.equals(PeerType.BUYER)){
             return new Inventory();
         } else if (type.equals(PeerType.SELLER)){

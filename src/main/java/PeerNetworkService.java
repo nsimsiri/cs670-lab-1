@@ -1,3 +1,6 @@
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.List;
 
@@ -6,10 +9,16 @@ import java.util.List;
  */
 public class PeerNetworkService {
     private static PeerNetworkService self;
+
     private PeerNetworkService(){}
 
-    public static PeerNetworkService getInstance(){
+    private Registry localRegistry;
+    private Registry remoteRegistry;
+
+    public static PeerNetworkService getInstance() throws RemoteException {
         if (self != null){
+            Registry remoteRegistry = LocateRegistry.getRegistry("edlab-ip", Registry.REGISTRY_PORT);
+            Registry localRegistry = LocateRegistry.getRegistry("localhost", Registry.REGISTRY_PORT);
             self = new PeerNetworkService();
         }
         return self;
@@ -22,6 +31,10 @@ public class PeerNetworkService {
      */
     public List<String> findNeighborNames(String myName){
         return Arrays.asList(myName.equals("A") ? "B" : "A");
+    }
+
+    public static void main(String[] args) throws Exception{
+        PeerNetworkService pns = PeerNetworkService.getInstance();
     }
 
 }
