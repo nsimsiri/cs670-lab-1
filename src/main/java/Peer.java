@@ -28,7 +28,8 @@ public class Peer implements ITradable {
     }
     
     @Override
-    public synchronized void lookup(String productName, int hopCount) {
+    public void lookup(String productName, int hopCount) {
+
     }
 
     /***
@@ -36,7 +37,7 @@ public class Peer implements ITradable {
      * @param sellerID
      */
     @Override
-    public synchronized void reply(Long sellerID) {
+    public void reply(Long sellerID) {
 
     }
 
