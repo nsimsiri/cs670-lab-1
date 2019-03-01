@@ -3,7 +3,7 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 public class PeerRunner {
 	public static void main(String args[]){
-		ConfigService config = new ConfigService();
+		ConfigService config = ConfigService.getInstance();
 		Properties configProp = config.ipConfig();
 		configProp.forEach((key,value)-> {
 			try {

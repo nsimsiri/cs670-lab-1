@@ -46,7 +46,7 @@ public class Inventory {
         if (type.equals(PeerType.BUYER)){
             return new Inventory();
         } else if (type.equals(PeerType.SELLER)){
-            return new Inventory(ConfigService.getInventoryCount());
+            return new Inventory(ConfigService.getInstance().getInventoryCount());
         } else {
             throw new IllegalArgumentException("Unable to handle PeerType:" + type);
         }
