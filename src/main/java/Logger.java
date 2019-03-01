@@ -13,7 +13,7 @@ public class Logger {
         if (in == null){
             in = "NULL";
         }
-        String text = "\n" + color + in.toString() + ANSI_RESET;
+        String text =  "\n" + "[" + loggerName +"] " + color + in.toString() + ANSI_RESET;
         if (params.length == 0){
             return text;
         }
