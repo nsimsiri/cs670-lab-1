@@ -1,5 +1,5 @@
 public enum{
         FISH,
-        SAlT,
+        SALT,
         BOARS
         }
