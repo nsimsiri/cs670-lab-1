@@ -7,10 +7,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -56,7 +53,7 @@ public class Peer implements IPeer {
         if (this.peerType.equals(PeerType.SELLER) && this.inventory.isSellingItem(productName)){
             potentialSellers.add(this.name);
         }
-        List<String> neighborNames = pns.getNeighbors(this.name);
+        Set<String> neighborNames = pns.getNeighbors(this.name);
         if (hopCount <= 0 || neighborNames.size() == 0) {
             //last seller, reply.
             this.reply(this.name, productName, path, potentialSellers);
@@ -206,6 +203,7 @@ public class Peer implements IPeer {
         PeerNetworkService pns = PeerNetworkService.getInstance();
         Registry registry = pns.getLocalRegistry();
         Peer.build(registry, "A", PeerType.BUYER);
+
 
     }
 }

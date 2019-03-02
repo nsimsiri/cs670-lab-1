@@ -1,12 +1,10 @@
 //import com.sun.tools.classfile.ConstantPool;
 
-import java.io.File;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 public class ConfigService {
     private static final Integer INVENTORY_COUNT = 2;
@@ -34,20 +32,75 @@ public class ConfigService {
     public Integer getHopCount() { return HOP_COUNT; }
 
 
-    public void ipConfig() {
-        String path = System.getProperty("user.dir")+"\\src\\main\\resources\\Graph.txt";
+    public Map<String,String[]> ipConfig() {
+        String path = System.getProperty("user.dir")+"\\src\\main\\resources\\Build_Config";
         System.out.println(path);
-        File file = new File(path);
-        System.out.println(file);
+        //File file = new File(path);
+        HashMap<String, String[]> map = new HashMap<String, String[]>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                String ipport = values[0] + values[1];
+                String vertex = values[2];
+                map.put(vertex, new String[]{values[0], values[1]});
+            }
+        }
+        catch(Exception e){
+                e.printStackTrace();
+            }
+        return map;
+        }
+
+
+    public Map<String, HashSet<String>> edgeList(){
+        String sep = File.separator;
+        String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%sGraph",
+                sep,sep, sep, sep);
+        System.out.println(path);
+        HashMap<String, HashSet<String>> map = new HashMap<String, HashSet<String>>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(" ");
+                String from = values[0];
+                String to = values[1];
+                if (map.containsKey(from)) {
+                HashSet<String> set = map.get(from);
+                set.add(to);
+                }
+                else{
+                    HashSet<String> set = new HashSet<String>();
+                    set.add(to);
+                    map.put(from, set);
+                }
+                if (map.containsKey(to)) {
+                    HashSet<String> set = map.get(to);
+                    set.add(from);
+                }
+                else{
+                    HashSet<String> set = new HashSet<String>();
+                    set.add(from);
+                    map.put(to, set);
+                }
+
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return map;
+
     }
-
-    //public Map<String, Set<String>> edgeList(){
-
-    //}
 
     public static void main(String[] args){
         ConfigService configService = ConfigService.getInstance();
-        configService.ipConfig();
+        Map<String, String[]> config = configService.ipConfig();
+        System.out.println(config.get("1")[0]);
+        Map<String,HashSet<String>> config2 = configService.edgeList();
+        System.out.println(config2.get("5"));
 //        System.out.println(System.getProperty("user.dir"));
 
 //        Properties p = configService.ipConfig();

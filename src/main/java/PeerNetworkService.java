@@ -1,3 +1,4 @@
+import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -9,7 +10,8 @@ import java.util.*;
 public class PeerNetworkService {
     private static PeerNetworkService self;
     private Logger logger = new Logger(PeerNetworkService.class.getSimpleName());
-
+    public Map<String, String[]> ipconfigmap;
+    public Map<String, HashSet<String>> graphconfigmap;
     private PeerNetworkService() throws RemoteException {
 //        Registry remoteRegistry = LocateRegistry.getRegistry("edlab-ip", Registry.REGISTRY_PORT);
 //        Registry localRegistry = LocateRegistry.getRegistry(Registry.REGISTRY_PORT);
@@ -21,6 +23,9 @@ public class PeerNetworkService {
         } finally {
             this.localRegistry = registry;
         }
+        ConfigService config = ConfigService.getInstance();
+        this.ipconfigmap = config.ipConfig();
+        this.graphconfigmap = config.edgeList();
     }
 
     private Registry localRegistry;
@@ -38,7 +43,8 @@ public class PeerNetworkService {
      * @param myName - caller's name/identification
      * @return
      */
-    public List<String> getNeighbors(String myName){
+    public Set<String> getNeighbors(String myName){
+        /*
         ConfigService configService = ConfigService.getInstance();
 
         List<String> neighborStrings = new ArrayList<>();
@@ -48,18 +54,18 @@ public class PeerNetworkService {
         stub.put("C", "D");
         String x = stub.getOrDefault(myName, null);
         if (x!=null) neighborStrings.add(x);
-        /*
+
           neighbors_map = configService.edgeList();
           return neighbors_map.get(myName);
         */
-        return neighborStrings;
+        return this.graphconfigmap.get(myName);
     }
 
     public IPeer getPeerByName(String peerName){
         try {
-            String[] info = peerName.split(",");
-            String host = info[0];
-            int port = Integer.parseInt(info[1]);
+            String[] rmi_array = this.ipconfigmap.get(peerName);
+            String host = rmi_array[0];
+            int port = Integer.parseInt(rmi_array[1]);
             Registry registry = LocateRegistry.getRegistry(host,port);
             IPeer peer = (IPeer) registry.lookup(peerName);
             return peer;
@@ -73,9 +79,13 @@ public class PeerNetworkService {
         return this.localRegistry;
     }
 
+    public List<String> getNamesOnThisMachine(){
+        return null;
+    }
+
     public static void main(String[] args) throws Exception{
         PeerNetworkService pns = PeerNetworkService.getInstance();
-        List<String> x = pns.getNeighbors("A");
+        Set<String> x = pns.getNeighbors("A");
         System.out.println(x);
     }
 
