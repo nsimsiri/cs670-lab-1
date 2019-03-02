@@ -48,12 +48,20 @@ public class PeerNetworkService {
         stub.put("C", "D");
         String x = stub.getOrDefault(myName, null);
         if (x!=null) neighborStrings.add(x);
+        /*
+          neighbors_map = configService.edgeList();
+          return neighbors_map.get(myName);
+        */
         return neighborStrings;
     }
 
     public IPeer getPeerByName(String peerName){
         try {
-            IPeer peer = (IPeer) this.localRegistry.lookup(peerName);
+            String[] info = peerName.split(",");
+            String host = info[0];
+            int port = Integer.parseInt(info[1]);
+            Registry registry = LocateRegistry.getRegistry(host,port);
+            IPeer peer = (IPeer) registry.lookup(peerName);
             return peer;
         } catch (Exception e){
             logger.severe(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));

@@ -1,10 +1,12 @@
-import com.sun.tools.classfile.ConstantPool;
+//import com.sun.tools.classfile.ConstantPool;
 
-import java.util.List;
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
-import java.util.Random;
 
 public class ConfigService {
     private static final Integer INVENTORY_COUNT = 2;
@@ -32,28 +34,22 @@ public class ConfigService {
     public Integer getHopCount() { return HOP_COUNT; }
 
 
-    public Properties ipConfig() {
-        String path = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "tpalaschak_config.txt";
+    public void ipConfig() {
+        String path = System.getProperty("user.dir")+"\\src\\main\\resources\\Graph.txt";
         System.out.println(path);
-        //String path = "tpalaschak_config.txt";
-        Properties prop = new Properties();
-        try {
-            prop.load(new FileInputStream(path));
-            return prop;
-        }
-        catch(IOException e){
-            e.printStackTrace();
-        }
-        return prop;
+        File file = new File(path);
+        System.out.println(file);
     }
 
-    public void getNeighbors(){
-        //List list = new List();
-        //return list;
-    }
+    //public Map<String, Set<String>> edgeList(){
+
+    //}
 
     public static void main(String[] args){
         ConfigService configService = ConfigService.getInstance();
+        configService.ipConfig();
+//        System.out.println(System.getProperty("user.dir"));
+
 //        Properties p = configService.ipConfig();
 //        System.out.println(p);
 //        String x = (String) p.get("1335");

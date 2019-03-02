@@ -4,6 +4,7 @@ import java.util.Properties;
 public class PeerRunner {
 	public static void main(String args[]){
 		ConfigService config = ConfigService.getInstance();
+		/*
 		Properties configProp = config.ipConfig();
 		configProp.forEach((key,value)-> {
 			try {
@@ -17,6 +18,7 @@ public class PeerRunner {
 			}
 		}
 			);
+		*/
 		//System.out.println(configProp.getProperty("1330"));
 		//System.out.println("rmi://172.30.121.74:1335");
 	}
