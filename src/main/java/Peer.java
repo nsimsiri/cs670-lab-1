@@ -56,13 +56,13 @@ public class Peer implements IPeer {
         if (this.peerType.equals(PeerType.SELLER) && this.inventory.isSellingItem(productName)){
             potentialSellers.add(this.name);
         }
-        if (hopCount <= 0) {
+        List<String> neighborNames = pns.getNeighbors(this.name);
+        if (hopCount <= 0 || neighborNames.size() == 0) {
             //last seller, reply.
-
             this.reply(this.name, productName, path, potentialSellers);
         } else {
             path.push(this.name);
-            List<String> neighborNames = pns.getNeighbors(this.name);
+            logger.info("looking up neighbors " + neighborNames);
             for(String neighborName : neighborNames) {
                 logger.info("searching " + neighborName);
                 if (previousNodeName.equals(neighborName)) continue;
@@ -128,7 +128,7 @@ public class Peer implements IPeer {
                     logger.info("sleep " + delay + " ms");
                     Thread.sleep(delay);
                     ItemType randomizedItem = ItemType.BOARS; //inventory.randomizeItemType();
-                    this.lookup(randomizedItem, 1, new Stack<>(), new ArrayList<>());
+                    this.lookup(randomizedItem, 10, new Stack<>(), new ArrayList<>());
 //                    this.lookup();
                 } catch (InterruptedException e){
                     logger.severe("- PEER BROKEN - " + e.getMessage());
