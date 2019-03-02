@@ -52,10 +52,10 @@ public class ConfigService {
 
     public static void main(String[] args){
         ConfigService configService = ConfigService.getInstance();
-        Properties p = configService.ipConfig();
-        System.out.println(p);
-        String x = (String) p.get("1335");
-        System.out.println
+//        Properties p = configService.ipConfig();
+//        System.out.println(p);
+//        String x = (String) p.get("1335");
+//        System.out.println
 
     }
 }

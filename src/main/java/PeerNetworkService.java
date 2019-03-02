@@ -1,10 +1,7 @@
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /***
  * Read only singleton, for managing registry.
@@ -12,15 +9,24 @@ import java.util.Properties;
 public class PeerNetworkService {
     private static PeerNetworkService self;
 
-    private PeerNetworkService(){}
+    private PeerNetworkService() throws RemoteException {
+//        Registry remoteRegistry = LocateRegistry.getRegistry("edlab-ip", Registry.REGISTRY_PORT);
+//        Registry localRegistry = LocateRegistry.getRegistry(Registry.REGISTRY_PORT);
+        Registry registry = null;
+        try {
+            registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
+        } catch(Exception e){
+            registry = LocateRegistry.getRegistry(Registry.REGISTRY_PORT);
+        } finally {
+            this.localRegistry = registry;
+        }
+    }
 
     private Registry localRegistry;
     private Registry remoteRegistry;
 
     public static PeerNetworkService getInstance() throws RemoteException {
-        if (self != null){
-            Registry remoteRegistry = LocateRegistry.getRegistry("edlab-ip", Registry.REGISTRY_PORT);
-            Registry localRegistry = LocateRegistry.getRegistry("localhost", Registry.REGISTRY_PORT);
+        if (self == null){
             self = new PeerNetworkService();
         }
         return self;
@@ -31,15 +37,26 @@ public class PeerNetworkService {
      * @param myName - caller's name/identification
      * @return
      */
-    public List<String> findNeighborNames(String myName){
+    public List<String> getNeighbors(String myName){
         ConfigService configService = ConfigService.getInstance();
-        Properties p = configService.ipConfig();
+
         List<String> neighborStrings = new ArrayList<>();
+        Map<String, String> stub = new HashMap<>();
+        stub.put("A", "B");
+        stub.put("B", "C");
+        stub.put("C", "D");
+        String x = stub.getOrDefault(myName, null);
+        if (x!=null) neighborStrings.add(x);
         return neighborStrings;
     }
 
-    public Peer getPeerByName(String peerName){
-        
+    public IPeer getPeerByName(String peerName){
+        try {
+            IPeer peer = (IPeer) this.localRegistry.lookup(peerName);
+            return peer;
+        } catch (Exception e){
+            e.printStackTrace();
+        }
         return null;
     }
 

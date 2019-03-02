@@ -1,5 +1,5 @@
 
-public class Peer implements ITradable {
+public class Peer implements IPeer {
     public Peer(){}
     
     @Override

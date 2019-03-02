@@ -1,8 +1,9 @@
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Stack;
 
-public interface ITradable extends Remote{
+public interface IPeer extends Remote{
     /***
      * 128.119.202.183
      * this procedure should search the network; all matching sellers respond to this
@@ -10,22 +11,25 @@ public interface ITradable extends Remote{
      * @param productName
      * @param hopCount
      */
-    void lookup(String productName, int hopCount, Stack<String> stack) throws RemoteException;
+    void lookup(ItemType productName, int hopCount,
+                        Stack<String> path, List<String> potentialSellers) throws RemoteException;
 
     /***
      * this is a reply message with the peerID of the seller
      * @param sellerID
      */
-    void reply(Long sellerID, Stack<String> stack) throws RemoteException;
+    public void reply(String sellerID, ItemType productName, Stack<String> stack,
+                      List<String> potentialSellers) throws RemoteException;
 
     /***
      *  if multiple sellers respond, the buyer picks one at random, and contacts it directly with the buy message.
      *  A buy causes the seller to decrement the number of items in stock.
      * @param peerID
      */
-    void buy(Long peerID) throws RemoteException;
+    void buy(String peerID, ItemType productName) throws RemoteException;
 
-    void completeTransaction(String buyerName) throws RemoteException;
+//    void completeTransaction(String buyerName) throws RemoteException;
+
 
     String getName() throws RemoteException;
 }

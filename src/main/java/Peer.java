@@ -1,12 +1,14 @@
 
 import java.io.IOException;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 import java.util.List;
+import java.util.Random;
 import java.util.Stack;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,11 +18,11 @@ import java.util.concurrent.Executors;
  * Two ideas on peer communication.
  * - (1) each peer holds a thread
  */
-public class Peer implements ITradable {
+public class Peer implements IPeer {
     private String name;
     private Logger logger;
     private final static Logger staticLogger = new Logger(Peer.class.getSimpleName());
-    ExecutorService threadPool = Executors.newFixedThreadPool(10);
+    private Inventory inventory;
 
     public Peer () throws RemoteException {}
     public Peer(String name) throws RemoteException {
@@ -29,27 +31,26 @@ public class Peer implements ITradable {
     }
     
     @Override
-    public synchronized List<String> lookup(String productName, int hopCount, Stack<String> path, List<String> potentialSellers) {
+    public synchronized void lookup(ItemType productName, int hopCount, Stack<String> path,
+                                            List<String> potentialSellers) throws RemoteException {
+
         PeerNetworkService pns = PeerNetworkService.getInstance();
-
-
         path.push(this.name);
 
-        List<String> neighborNames = pns.getNeighbors(this.name);
-            for(String neighborNames : neighborNames){
-            Peer neighbor = pns.geNeighborByName(neighborName);
-            if (hopCount <= 0){
-                //last seller, reply.
-
-            } else {
-
-            }
-            List<String> potentialSellers = neighbor.lookup(productName, hopeCount - 1);
+        if (this.inventory.isSellingItem(productName)){
+            potentialSellers.add(this.name);
         }
 
-
-
-
+        List<String> neighborNames = pns.getNeighbors(this.name);
+        for(String neighborName : neighborNames) {
+            IPeer neighbor = pns.getPeerByName(neighborName);
+            if (hopCount <= 0) {
+                //last seller, reply.
+                neighbor.reply(this.name, productName, path, potentialSellers);
+            } else {
+                neighbor.lookup(productName, hopCount - 1, path, potentialSellers);
+            }
+        }
     }
 
     /***
@@ -57,23 +58,27 @@ public class Peer implements ITradable {
      * @param sellerID
      */
     @Override
-
-    public synchronized void reply(Long sellerID, Stack<String> stack){
-        /* our invariant gaurantes stakc is not empty
-        stack.pop()
-        PeerNetworkService pns = PerNetworkService.getInstance();
+    public synchronized void reply(String sellerID, ItemType productName, Stack<String> stack,
+                                   List<String> potentialSellers) throws RemoteException {
+        /* our invariant gaurantes stack is not empty */
+        stack.pop();
+        PeerNetworkService pns = PeerNetworkService.getInstance();
         if (stack.isEmpty()){
             // we're the buyer, call buy
-            Peer seller = pns.getPeerByName(sellerID);
-            seller.buy(this.name);
+            int nSellers = potentialSellers.size();
+            if (nSellers == 0) return;
+            int randIdx = new Random().nextInt(nSellers);
+            String sellerCandidateID = potentialSellers.get(randIdx);
+            IPeer seller = pns.getPeerByName(sellerCandidateID);
+            seller.buy(this.name, productName);
 
         } else {
             String middlemanName = stack.pop();
-            Peer middleman = pns.getPeerByName(middlemanName);
-            middle.reply(sellerID, stack);
+            IPeer middleman = pns.getPeerByName(middlemanName);
+            middleman.reply(sellerID, productName, stack, potentialSellers);
         }
 
-         */
+
     }
 
     /***
@@ -81,14 +86,11 @@ public class Peer implements ITradable {
      * @param peerID
      */
     @Override
-    public synchronized void buy(Long peerID) {
-        logger.info("greetings from " + peerID);
-        /*
-        PeerNetworkService pns = PeerNetworkService.getInstance();
-        Peer p = pns.getPeerByName(peerID);
-
-
-         */
+    public synchronized void buy(String peerID, ItemType productName) {
+        logger.info("");
+        if (this.inventory.isSellingItem(productName)){
+            this.inventory.take(productName);
+        }
     }
 
     public void runBuyer(){
@@ -127,13 +129,15 @@ public class Peer implements ITradable {
     public static void build(Registry registry, String name){
         try {
             Peer server = new Peer(name);
-            ITradable serverStub = (ITradable) UnicastRemoteObject.exportObject(server, 8002);
+            IPeer serverStub = (IPeer) UnicastRemoteObject.exportObject(server, 8002);
 //            String hardName = String.format("//128.119.202.183/"+name);
             staticLogger.info("starting peer... " + name);
 
             registry.bind(name, serverStub);
             staticLogger.info("node server initiated");
-            server.runBuyer();
+
+//            serverStub.lookup();
+//            server.runBuyer();
         } catch (Exception e){
 
             e.printStackTrace();

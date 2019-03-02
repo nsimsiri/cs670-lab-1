@@ -1,4 +1,4 @@
-public interface ITradable {
+public interface IPeer {
 
     /***
      * this procedure should search the network; all matching sellers respond to this
