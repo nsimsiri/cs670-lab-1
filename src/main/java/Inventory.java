@@ -1,7 +1,7 @@
 import java.util.*;
 
 /***
- * Abstraction for inventory/product bookkeeping.
+ * Abstraction for inventory/product bookkeeping. public methods are synchronized to prevent concurrent writes.
  * Requirements:
  *  - Each seller starts with n items (e.g., n boars) to sell; upon selling all n items,
  *  the seller picks another item at random and becomes a seller of that item.

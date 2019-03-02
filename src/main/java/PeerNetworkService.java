@@ -1,8 +1,10 @@
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 /***
  * Read only singleton, for managing registry.
@@ -30,7 +32,15 @@ public class PeerNetworkService {
      * @return
      */
     public List<String> findNeighborNames(String myName){
-        return Arrays.asList(myName.equals("A") ? "B" : "A");
+        ConfigService configService = ConfigService.getInstance();
+        Properties p = configService.ipConfig();
+        List<String> neighborStrings = new ArrayList<>();
+        return neighborStrings;
+    }
+
+    public Peer getPeerByName(String peerName){
+        
+        return null;
     }
 
     public static void main(String[] args) throws Exception{

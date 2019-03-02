@@ -25,5 +25,7 @@ public interface ITradable extends Remote{
      */
     void buy(Long peerID) throws RemoteException;
 
+    void completeTransaction(String buyerName) throws RemoteException;
+
     String getName() throws RemoteException;
 }

@@ -6,7 +6,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
+import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /***
  * Both Server and Client
@@ -17,6 +20,7 @@ public class Peer implements ITradable {
     private String name;
     private Logger logger;
     private final static Logger staticLogger = new Logger(Peer.class.getSimpleName());
+    ExecutorService threadPool = Executors.newFixedThreadPool(10);
 
     public Peer () throws RemoteException {}
     public Peer(String name) throws RemoteException {
@@ -25,7 +29,27 @@ public class Peer implements ITradable {
     }
     
     @Override
-    public synchronized void lookup(String productName, int hopCount, Stack<String> stack) {
+    public synchronized List<String> lookup(String productName, int hopCount, Stack<String> path, List<String> potentialSellers) {
+        PeerNetworkService pns = PeerNetworkService.getInstance();
+
+
+        path.push(this.name);
+
+        List<String> neighborNames = pns.getNeighbors(this.name);
+            for(String neighborNames : neighborNames){
+            Peer neighbor = pns.geNeighborByName(neighborName);
+            if (hopCount <= 0){
+                //last seller, reply.
+
+            } else {
+
+            }
+            List<String> potentialSellers = neighbor.lookup(productName, hopeCount - 1);
+        }
+
+
+
+
     }
 
     /***
@@ -35,6 +59,21 @@ public class Peer implements ITradable {
     @Override
 
     public synchronized void reply(Long sellerID, Stack<String> stack){
+        /* our invariant gaurantes stakc is not empty
+        stack.pop()
+        PeerNetworkService pns = PerNetworkService.getInstance();
+        if (stack.isEmpty()){
+            // we're the buyer, call buy
+            Peer seller = pns.getPeerByName(sellerID);
+            seller.buy(this.name);
+
+        } else {
+            String middlemanName = stack.pop();
+            Peer middleman = pns.getPeerByName(middlemanName);
+            middle.reply(sellerID, stack);
+        }
+
+         */
     }
 
     /***
@@ -44,6 +83,12 @@ public class Peer implements ITradable {
     @Override
     public synchronized void buy(Long peerID) {
         logger.info("greetings from " + peerID);
+        /*
+        PeerNetworkService pns = PeerNetworkService.getInstance();
+        Peer p = pns.getPeerByName(peerID);
+
+
+         */
     }
 
     public void runBuyer(){

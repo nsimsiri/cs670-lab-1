@@ -1,3 +1,5 @@
+import com.sun.tools.classfile.ConstantPool;
+
 import java.util.List;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,12 +25,14 @@ public class ConfigService {
         return new Double(Math.random() * BUYER_DELAY).longValue();
     }
 
-    public  Integer getInventoryCount() {
+    public Integer getInventoryCount() {
         return INVENTORY_COUNT;
     }
 
-    public  Properties ipConfig() {
+
+    public Properties ipConfig() {
         String path = Thread.currentThread().getContextClassLoader().getResource("").getPath() + "tpalaschak_config.txt";
+        System.out.println(path);
         //String path = "tpalaschak_config.txt";
         Properties prop = new Properties();
         try {
@@ -44,5 +48,14 @@ public class ConfigService {
     public void getNeighbors(){
         //List list = new List();
         //return list;
+    }
+
+    public static void main(String[] args){
+        ConfigService configService = ConfigService.getInstance();
+        Properties p = configService.ipConfig();
+        System.out.println(p);
+        String x = (String) p.get("1335");
+        System.out.println
+
     }
 }
