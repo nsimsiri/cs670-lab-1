@@ -32,7 +32,13 @@ public class Inventory {
         if (!this.inventoryMap.containsKey(product) || this.inventoryMap.get(product) <= 0){
             return false;
         }
-        this.inventoryMap.put(product, this.inventoryMap.get(product) - 1);
+        int newProductCount = this.inventoryMap.get(product) - 1;
+        if (newProductCount <= 0){
+            this.resetToItemType(randomizeItemType());
+        } else {
+            this.inventoryMap.put(product, newProductCount);
+        }
+
         return true;
     }
 

@@ -7,8 +7,9 @@ import java.util.Properties;
 import java.util.Random;
 
 public class ConfigService {
-    private static final Integer INVENTORY_COUNT = 10;
+    private static final Integer INVENTORY_COUNT = 2;
     private static final Long BUYER_DELAY = 3000L;
+    private static final Integer HOP_COUNT = 10;
 
     private static ConfigService configService;
 
@@ -28,6 +29,7 @@ public class ConfigService {
     public Integer getInventoryCount() {
         return INVENTORY_COUNT;
     }
+    public Integer getHopCount() { return HOP_COUNT; }
 
 
     public Properties ipConfig() {

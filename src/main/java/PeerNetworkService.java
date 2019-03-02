@@ -8,6 +8,7 @@ import java.util.*;
  */
 public class PeerNetworkService {
     private static PeerNetworkService self;
+    private Logger logger = new Logger(PeerNetworkService.class.getSimpleName());
 
     private PeerNetworkService() throws RemoteException {
 //        Registry remoteRegistry = LocateRegistry.getRegistry("edlab-ip", Registry.REGISTRY_PORT);
@@ -55,13 +56,20 @@ public class PeerNetworkService {
             IPeer peer = (IPeer) this.localRegistry.lookup(peerName);
             return peer;
         } catch (Exception e){
-            e.printStackTrace();
+            logger.severe(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
         }
         return null;
     }
 
+    public Registry getLocalRegistry(){
+        return this.localRegistry;
+    }
+
     public static void main(String[] args) throws Exception{
         PeerNetworkService pns = PeerNetworkService.getInstance();
+        List<String> x = pns.getNeighbors("A");
+        System.out.println(x);
     }
+
 
 }
