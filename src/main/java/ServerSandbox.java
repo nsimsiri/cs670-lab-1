@@ -7,14 +7,11 @@ public class ServerSandbox {
 
     public static void main(String[] args) throws Exception {
         Registry registry = null;
-        String ip = "192.168.43.16";
-
+        System.setProperty("java.rmi.server.hostname","192.168.43.20");
         try {
             registry = LocateRegistry.createRegistry(5005);
-            System.out.println("create registry");
         } catch(Exception e){
-            registry = LocateRegistry.getRegistry(5005);
-            System.out.println("get registry");
+            registry = LocateRegistry.getRegistry("192.168.43.20",5005);
 
         }
 
