@@ -2,7 +2,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
 
-public class ClientSanbox {
+public class NatchaClientSanbox {
     static Logger logger = new Logger("ClientSandbox");
     public static void main(String[] args) throws Exception{
         Registry registry = null;

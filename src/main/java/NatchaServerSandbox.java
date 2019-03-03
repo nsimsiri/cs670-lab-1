@@ -3,7 +3,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-public class ServerSandbox {
+public class NatchaServerSandbox {
 
     public static void main(String[] args) throws Exception {
         Registry registry = null;
