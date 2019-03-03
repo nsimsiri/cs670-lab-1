@@ -28,8 +28,9 @@ public class ConfigService {
 
 
     public Map<String,String[]> ipConfig() {
-        String path = System.getProperty("user.dir")+"\\src\\main\\resources\\Build_Config";
-        System.out.println(path);
+        String sep = File.separator;
+        String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%sBuild_Config",
+                sep,sep, sep, sep);
         //File file = new File(path);
         HashMap<String, String[]> map = new HashMap<String, String[]>();
         try {

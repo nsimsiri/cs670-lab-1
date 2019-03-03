@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -92,13 +95,32 @@ public class PeerNetworkService {
     }
 
     public List<String> getNamesOnThisMachine(){
-        return null;
+        String sep = File.separator;
+        String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%sMachineIP",
+                sep,sep, sep, sep);
+        ArrayList<String> nameList = new ArrayList<>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            String machineip = br.readLine();
+            for (Map.Entry<String, String[]> entry : this.ipconfigmap.entrySet()) {
+                if(entry.getValue()[0].equals(machineip)){
+                    nameList.add(entry.getKey());
+                }
+            }
+        }
+        catch(Exception e){
+         e.printStackTrace();
+        }
+
+        return nameList;
     }
 
     public static void main(String[] args) throws Exception{
         PeerNetworkService pns = PeerNetworkService.getInstance();
-        Set<String> x = pns.getNeighbors("A");
+        Set<String> x = pns.getNeighbors("5");
         System.out.println(x);
+
+
     }
 
 
