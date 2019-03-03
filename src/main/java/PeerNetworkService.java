@@ -27,8 +27,8 @@ public class PeerNetworkService {
             this.localRegistry = registry;
         }
         ConfigService config = ConfigService.getInstance();
-//        this.ipconfigmap = config.ipConfig();
-//        this.graphconfigmap = config.edgeList();
+        this.ipconfigmap = config.ipConfig();
+        this.graphconfigmap = config.edgeList();
     }
 
     private Registry localRegistry;
@@ -143,18 +143,19 @@ public class PeerNetworkService {
     public IPeer getPeerByName(String peerName){
         try {
             String[] rmi_array = this.ipconfigmap.get(peerName);
-            System.out.println();
+
             String host = rmi_array[0];
             int port = Integer.parseInt(rmi_array[1]);
-
+            //System.out.println(host+ " " + port);
             Registry registry = LocateRegistry.getRegistry(host,port);
-
+            //System.out.println(registry);
             IPeer peer = (IPeer) registry.lookup(peerName);
             return peer;
         } catch (Exception e){
             logger.severe(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
+            throw new IllegalArgumentException("no peers " + peerName + " init.");
         }
-        return null;
+
     }
 
     public Registry getLocalRegistry(){
@@ -181,12 +182,31 @@ public class PeerNetworkService {
 
         return nameList;
     }
+    public void waitPeers(int wait) {
+        boolean x = true;
+        while(x){
+            try {
+                for (Map.Entry<String, String[]> entry : this.ipconfigmap.entrySet()) {
+                    getPeerByName(entry.getKey());
+                }
+                x = false;
+            } catch (Exception f) {
+                try {
+                    System.out.println("test");
+                    Thread.sleep(wait);
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+    }
+        System.out.println("All peers have been initialized.");
+    }
 
     public static void main(String[] args) throws Exception{
         PeerNetworkService pns = PeerNetworkService.getInstance();
 
-        Set<String> x = pns.getNeighbors("5");
-        System.out.println(x);
+        pns.waitPeers(10000);
     }
 
 
