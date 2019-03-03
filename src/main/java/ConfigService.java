@@ -5,10 +5,15 @@ public class ConfigService {
     private static final Integer INVENTORY_COUNT = 2;
     private static final Long BUYER_DELAY = 3000L;
     private static final Integer HOP_COUNT = 2;
+    private static final String sep = File.separator;
+    private static final String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%slocal_test%s",
+            sep,sep,sep,sep,sep);
 
     private static ConfigService configService;
-
-    private ConfigService(){}
+    public String filepath;
+    private ConfigService(){
+        this.filepath = path;
+    }
     public static ConfigService getInstance(){
         if (configService == null){
             configService = new ConfigService();
@@ -28,13 +33,13 @@ public class ConfigService {
 
 
     public Map<String,String[]> ipConfig() {
-        String sep = File.separator;
-        String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%sBuild_Config",
-                sep,sep, sep, sep);
+        //String sep = File.separator;
+        //String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%sBuild_Config",
+        //        sep,sep, sep, sep);
         //File file = new File(path);
         HashMap<String, String[]> map = new HashMap<String, String[]>();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(path));
+            BufferedReader br = new BufferedReader(new FileReader(this.filepath+"Build_Config"));
             String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
@@ -51,13 +56,13 @@ public class ConfigService {
 
 
     public Map<String, HashSet<String>> edgeList(){
-        String sep = File.separator;
-        String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%sGraph",
-                sep,sep, sep, sep);
-        System.out.println(path);
+        //String sep = File.separator;
+        //String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%sGraph",
+        //       sep,sep, sep, sep);
+        //System.out.println(path);
         HashMap<String, HashSet<String>> map = new HashMap<String, HashSet<String>>();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(path));
+            BufferedReader br = new BufferedReader(new FileReader(this.filepath+"Graph"));
             String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(" ");
