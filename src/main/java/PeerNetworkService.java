@@ -38,7 +38,7 @@ public class PeerNetworkService {
      * @param myName - caller's name/identification
      * @return
      */
-    public List<String> getNeighbors(String myName){
+    public Set<String> getNeighbors(String myName){
         ConfigService configService = ConfigService.getInstance();
 
         List<String> neighborStrings = new ArrayList<>();
@@ -48,7 +48,7 @@ public class PeerNetworkService {
         stub.put("C", "D");
         String x = stub.getOrDefault(myName, null);
         if (x!=null) neighborStrings.add(x);
-        return neighborStrings;
+        return new HashSet<>(neighborStrings);
     }
 
     public IPeer getPeerByName(String peerName){
@@ -67,7 +67,8 @@ public class PeerNetworkService {
 
     public static void main(String[] args) throws Exception{
         PeerNetworkService pns = PeerNetworkService.getInstance();
-        List<String> x = pns.getNeighbors("A");
+        Set<String> x = pns.getNeighbors("A");
+
         System.out.println(x);
     }
 

@@ -1,6 +1,5 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.time.Instant;
+import java.util.*;
 
 /***
  * This class determines which if transactions (buyer, product, time) to other nodes have completed
@@ -24,6 +23,9 @@ public class StackMerger {
     }
 
     public synchronized void createLookup(Lookup lookup, int count){
+        if (containsLookup(lookup)){
+            throw new IllegalArgumentException("Look up already created " + lookup);
+        }
         LookupInfo info = new LookupInfo(count);
         this.map.put(lookup, info);
     }
@@ -55,7 +57,7 @@ public class StackMerger {
         return info.count;
     }
 
-    public synchronized List<String> getLookupSellers(Lookup lookup){
+    public synchronized Set<String> getLookupSellers(Lookup lookup){
         if (!this.map.containsKey(lookup)){
             throw new IllegalArgumentException("Look up not found " + lookup);
         }
@@ -75,15 +77,15 @@ public class StackMerger {
 
     public static class LookupInfo {
         public Integer count;
-        public ArrayList<String> potentialSellers;
+        public HashSet<String> potentialSellers;
         public LookupInfo(Integer count){
             this.count = count;
-            this.potentialSellers = new ArrayList<>();
+            this.potentialSellers = new HashSet<>();
         }
 
         @Override
         public String toString(){
-            return String.format("LookupInfo[%s %s]", count, potentialSellers);
+            return String.format("LookupInfo[cnt=%s sell=%s]", count, potentialSellers);
         }
     }
 
@@ -94,5 +96,26 @@ public class StackMerger {
 
     public static void main(String[] args){
         System.out.println(System.getProperty("user.dir"));
+        Long timestamp = Instant.now().toEpochMilli();
+        System.out.println(timestamp);
+        Lookup a = new Lookup("natcha", ItemType.BOARS, timestamp);
+        Lookup b = new Lookup("natcha", ItemType.BOARS, timestamp);
+        Lookup c = new Lookup("natcha", ItemType.SALT, timestamp);
+        Lookup d = new Lookup("tom", ItemType.BOARS, timestamp);
+        Lookup e = new Lookup("natcha", ItemType.BOARS, timestamp+1);
+
+        StackMerger sm = new StackMerger();
+        sm.createLookup(a, 2);
+        sm.createLookup(e, 5);
+        System.out.println(sm + " " + sm.getLookupCount(a));
+        sm.decrementLookup(a);
+        System.out.println(sm + " " + sm.getLookupCount(a));
+        sm.decrementLookup(a);
+        System.out.println(sm);
+        sm.createLookup(b, 3);
+        sm.addLookupSellers(b, Arrays.asList("a","b"));
+        System.out.println(sm);
+        sm.addLookupSellers(b, Arrays.asList("a","d","e"));
+        System.out.println(sm);
     }
 }
