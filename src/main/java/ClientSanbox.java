@@ -7,7 +7,7 @@ public class ClientSanbox {
     public static void main(String[] args) throws Exception{
         Registry registry = null;
         String ip = "192.168.43.16";
-        registry = LocateRegistry.getRegistry("192.168.43.16", 5005);
+        registry = LocateRegistry.getRegistry("192.168.43.16", Registry.REGISTRY_PORT);
         System.out.println(registry);
         IPeer p = (IPeer) registry.lookup("Natcha");
         System.out.println(p.getName());

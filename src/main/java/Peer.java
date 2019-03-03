@@ -5,6 +5,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.time.Instant;
+import java.util.stream.Collectors;
 
 /***
  * Both Server and Client
@@ -42,7 +43,7 @@ public class Peer implements IPeer {
         PeerNetworkService pns = PeerNetworkService.getInstance();
         String previousNodeName = path.isEmpty() ? new String() : path.peek();
 
-        logger.info("%s->%s lookup %s hop=%s path=%s sellers=%s",
+        logger.info("LOOKUP: %s-> %s %s hop=%s path=%s sellers=%s",
                 previousNodeName, this.toString(), productName, hopCount, path, potentialSellers);
 
         // as we hope along the network, we collect our potential sellers.
@@ -52,9 +53,20 @@ public class Peer implements IPeer {
 
         // we get our neighbors from PeerNetworkService which encodes our network's topology.
         Set<String> neighborNames = pns.getNeighbors(this.name);
+        neighborNames = neighborNames.stream().filter(x -> !x.equals(previousNodeName)).collect(Collectors.toSet());
 
         // we begin our look-up search logic
-        if (hopCount <= 0 || neighborNames.size() == 0) {
+
+        // this node has been visited before, we will not traverse and our hop ends here.
+        boolean cycleFound = false;
+        synchronized (this.merger){
+            if (this.merger.containsLookup(lookup)){
+                logger.warning("Cycle detected, " + previousNodeName + " revisited" + this.name + " on lookup " + lookup);
+                cycleFound = true;
+            }
+        }
+
+        if (hopCount <= 0 || neighborNames.size() == 0 || cycleFound) {
             // last hop count or no more neighbor means we traverse
             // the path we took back to the buyer with reply to previous peer
             if (previousNodeName.isEmpty()) return; //
@@ -72,14 +84,6 @@ public class Peer implements IPeer {
             thread.start();
         } else {
             // we still have hops, so we hop to our neighbors
-
-            // this node has been visited before, we will not traverse and our hop ends here.
-            synchronized (this.merger){
-                if (this.merger.containsLookup(lookup)){
-                    logger.warning("Cycle detected, revisited" + this.name + " on lookup " + lookup);
-                    return;
-                }
-            }
             // keep track of who we've traveled along so far.
             path.push(this.name);
 //            logger.info("looking up neighbors " + neighborNames);
@@ -95,9 +99,6 @@ public class Peer implements IPeer {
 
             // asynchronous traversal of each neighbors, decrementing the count as we go and tracking state as we go.
             for(String neighborName : neighborNames) {
-//                logger.info("searching " + neighborName);
-                if (previousNodeName.equals(neighborName)) continue;
-
                 IPeer neighbor = pns.getPeerByName(neighborName);
                 if (neighbor == null) continue;
 
@@ -109,7 +110,6 @@ public class Peer implements IPeer {
                         e.printStackTrace();
                     }
                 };
-
                 Thread thread = new Thread(task);
                 thread.start();
             }

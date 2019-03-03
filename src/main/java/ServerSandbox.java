@@ -7,17 +7,17 @@ public class ServerSandbox {
 
     public static void main(String[] args) throws Exception {
         Registry registry = null;
-        System.setProperty("java.rmi.server.hostname","192.168.43.20");
+        System.setProperty("java.rmi.server.hostname","192.168.43.16");
         try {
-            registry = LocateRegistry.createRegistry(5005);
+            registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
         } catch(Exception e){
-            registry = LocateRegistry.getRegistry("192.168.43.20",5005);
+            registry = LocateRegistry.getRegistry("192.168.43.16",Registry.REGISTRY_PORT);
 
         }
 
         Peer server = new Peer("Natcha", PeerType.SELLER, null);
         System.out.println("Peer Made: " + server);
-        IPeer serverStub = (IPeer) UnicastRemoteObject.exportObject(server, 5005);
+        IPeer serverStub = (IPeer) UnicastRemoteObject.exportObject(server, Registry.REGISTRY_PORT);
         registry.bind(server.getName(), serverStub);
         System.out.println("Peer Server Started!");
 
