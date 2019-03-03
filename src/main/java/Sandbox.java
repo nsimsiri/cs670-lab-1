@@ -7,35 +7,39 @@ import java.util.Random;
 import java.util.Stack;
 
 public class Sandbox {
+    public static void initAllSellers(Registry localRegistry){
+        System.out.println("Init All Sellers");
+
+        IPeer B = Peer.build(localRegistry, "B", PeerType.SELLER, 0, ItemType.BOARS);
+        IPeer C = Peer.build(localRegistry, "C", PeerType.SELLER, 0, ItemType.BOARS);
+        IPeer D = Peer.build(localRegistry, "D", PeerType.SELLER, 0, ItemType.FISH);
+        IPeer E = Peer.build(localRegistry, "E", PeerType.SELLER, 0, ItemType.BOARS);
+        IPeer F = Peer.build(localRegistry, "F", PeerType.SELLER, 0, ItemType.BOARS);
+        IPeer G = Peer.build(localRegistry, "G", PeerType.SELLER, 0, ItemType.FISH);
+        IPeer H = Peer.build(localRegistry, "H", PeerType.SELLER, 0, ItemType.FISH);
+    }
+
+    public static void initSomeBuyers(Registry localRegistry){
+        System.out.println("Init Some Buyers");
+
+        IPeer B = Peer.build(localRegistry, "B", PeerType.BUYER, 0);
+        IPeer C = Peer.build(localRegistry, "C", PeerType.SELLER, 0, ItemType.BOARS);
+        IPeer D = Peer.build(localRegistry, "D", PeerType.SELLER, 0, ItemType.BOARS);
+
+        IPeer E = Peer.build(localRegistry, "E", PeerType.BUYER, 0);
+        IPeer F = Peer.build(localRegistry, "F", PeerType.SELLER, 0, ItemType.BOARS);
+        IPeer G = Peer.build(localRegistry, "G", PeerType.BUYER, 0);
+        IPeer H = Peer.build(localRegistry, "H", PeerType.SELLER, 0, ItemType.FISH);
+    }
+
+
     public static void main(String[] args) throws RemoteException {
         try {
             PeerNetworkService pns = PeerNetworkService.getInstance();
             Registry localRegistry = pns.getLocalRegistry();
-//            System.out.println(registry);
-//            IPeer peerStub = (IPeer) registry.lookup(pA");
-//            IPeer peerStub = pns.getPeerByName("A");
-//            ItemType item = ItemType.valueOf("BOARS");
-//            int hopCount = 10;
-//            Stack<String> path = new Stack<>();
-//            path.push("a"); path.push("b");
-//            List<String> sellers = Arrays.asList("kk", "dskfjd");
-//            System.out.println(peerStub);
-//            peerStub.lookup(item, hopCount, path, sellers);
-            IPeer B = Peer.build(localRegistry, "B", PeerType.SELLER, 0, ItemType.BOARS);
-            IPeer C = Peer.build(localRegistry, "C", PeerType.SELLER, 0, ItemType.BOARS);
-            IPeer D = Peer.build(localRegistry, "D", PeerType.SELLER, 0, ItemType.FISH);
-            IPeer E = Peer.build(localRegistry, "E", PeerType.SELLER, 0, ItemType.BOARS);
-            IPeer F = Peer.build(localRegistry, "F", PeerType.SELLER, 0, ItemType.BOARS);
-            IPeer G = Peer.build(localRegistry, "G", PeerType.SELLER, 0, ItemType.FISH);
-            IPeer H = Peer.build(localRegistry, "H", PeerType.SELLER, 0, ItemType.FISH);
 
-            System.out.println(B);
-            System.out.println(C);
-            System.out.println(D);
-            System.out.println(E);
-            System.out.println(F);
-            System.out.println(G);
-            System.out.println(H);
+            initSomeBuyers(localRegistry);
+
 
         } catch (Exception e){
             e.printStackTrace();

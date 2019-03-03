@@ -39,10 +39,11 @@ public class Peer implements IPeer {
                                             List<String> potentialSellers) throws RemoteException {
 
         ItemType productName = lookup.getProductName();
-        logger.info("%s lookup %s hop=%s path=%s sellers=%s", this.toString(), productName, hopCount, path, potentialSellers);
-
         PeerNetworkService pns = PeerNetworkService.getInstance();
         String previousNodeName = path.isEmpty() ? new String() : path.peek();
+
+        logger.info("%s->%s lookup %s hop=%s path=%s sellers=%s",
+                previousNodeName, this.toString(), productName, hopCount, path, potentialSellers);
 
         // as we hope along the network, we collect our potential sellers.
         if (this.peerType.equals(PeerType.SELLER) && this.inventory.isSellingItem(productName)){
@@ -75,7 +76,7 @@ public class Peer implements IPeer {
             // this node has been visited before, we will not traverse and our hop ends here.
             synchronized (this.merger){
                 if (this.merger.containsLookup(lookup)){
-//                    logger.info("has visited " + this.name + " - " + lookup);
+                    logger.warning("Cycle detected, revisited" + this.name + " on lookup " + lookup);
                     return;
                 }
             }
@@ -135,7 +136,7 @@ public class Peer implements IPeer {
             int count = this.merger.getLookupCount(lookup);
             logger.info("REPLY %s %s path=%s sellers=%s -- count: %s/%s", sellerID, productName, stack,
                     potentialSellers, count, this.merger.getTotalCount(lookup));
-            logger.info("--merger: " + this.merger);
+//            logger.warning("--merger: " + this.merger);
             this.merger.addLookupSellers(lookup, potentialSellers);
             if (count <= 0){
                 // all forked messages have returned
@@ -156,7 +157,6 @@ public class Peer implements IPeer {
                     List<String> sellersList = new ArrayList<>(sellers);
                     String sellerCandidateID = sellersList.get(randIdx);
                     IPeer seller = pns.getPeerByName(sellerCandidateID);
-//                    logger.warning("BUYING CHECK nSellers=%s sellers=%s randomized=%s", nSellers, sellersList, randIdx);
                     seller.buy(this.name, productName);
                     this.merger.removeLookup(lookup);
                 } else {
@@ -166,11 +166,9 @@ public class Peer implements IPeer {
                     logger.info("REPLY(2) - At middleman, all neighbors have returned - initiate pass-back to " +  previousPeerID);
 
                     IPeer previousPeer = pns.getPeerByName(previousPeerID);
-//                    logger.warning(previousPeer);
 
                     Set<String> storedPotentialSellers = this.merger.getLookupSellers(lookup);
                     List<String> _storedPotentialSellers = new ArrayList<>(storedPotentialSellers);
-//                    logger.warning("replying with sellers %s and stack %s", _storedPotentialSellers, stack);
 
                     Runnable task = () -> {
                         try {
@@ -199,11 +197,13 @@ public class Peer implements IPeer {
      */
     @Override
     public void buy(String peerID, ItemType productName) {
-        logger.info("BUY %s %s", productName, this.toString());
+        logger.info("$$ -> %s ATTEMPTS BUY %s FROM %s with inventory %s",
+                peerID, productName, this.toString(), this.inventory);
         synchronized(this.inventory){
             if (this.inventory.isSellingItem(productName)){
                 this.inventory.take(productName);
-                logger.info("!! BOUGHT " + productName + " now seller has " + this.inventory);
+                logger.info("$$ -> %s PURCHASED %s FROM %s with inventory %s",
+                        peerID, productName, this.toString(), this.inventory);
             } else {
                 logger.info("%s no longer sold by %s", productName, this);
             }
@@ -281,9 +281,8 @@ public class Peer implements IPeer {
             }
 
             IPeer serverStub = (IPeer) UnicastRemoteObject.exportObject(server, port);
-            staticLogger.info("starting peer... " + server);
             registry.bind(name, serverStub);
-            staticLogger.info(name + " STARTED");
+            staticLogger.info("ONLINE: " + server);
 
         } catch (Exception e){
             e.printStackTrace();
