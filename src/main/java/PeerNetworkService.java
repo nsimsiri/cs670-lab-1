@@ -39,16 +39,23 @@ public class PeerNetworkService {
      * @return
      */
     public Set<String> getNeighbors(String myName){
-        ConfigService configService = ConfigService.getInstance();
+       return _getNeighbors(myName);
+    }
+
+    public Set<String> _getNeighbors(String myName){
 
         List<String> neighborStrings = new ArrayList<>();
         Map<String, String> stub = new HashMap<>();
-        stub.put("A", "B");
-        stub.put("B", "C");
-        stub.put("C", "D");
+        // test case 1 - line
+        stub.put("A", "B"); stub.put("B", "C"); stub.put("C", "D");
+
+        // test case 1 - star
+//        stub.put("A", "B"); stub.put("A", "C"); stub.put("A", "D");
+
         String x = stub.getOrDefault(myName, null);
         if (x!=null) neighborStrings.add(x);
         return new HashSet<>(neighborStrings);
+
     }
 
     public IPeer getPeerByName(String peerName){
@@ -66,10 +73,11 @@ public class PeerNetworkService {
     }
 
     public static void main(String[] args) throws Exception{
-        PeerNetworkService pns = PeerNetworkService.getInstance();
-        Set<String> x = pns.getNeighbors("A");
-
-        System.out.println(x);
+//        PeerNetworkService pns = PeerNetworkService.getInstance();
+//        Set<String> x = pns.getNeighbors("A");
+//
+//        System.out.println(x);
+        System.out.println("".isEmpty());
     }
 
 

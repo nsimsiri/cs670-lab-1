@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-public class Lookup {
+public class Lookup implements Serializable {
     private String buyerID;
     private ItemType productName;
     private Long timestamp;

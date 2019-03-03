@@ -7,7 +7,7 @@ import java.util.Random;
 public class ConfigService {
     private static final Integer INVENTORY_COUNT = 2;
     private static final Long BUYER_DELAY = 3000L;
-    private static final Integer HOP_COUNT = 10;
+    private static final Integer HOP_COUNT = 2;
 
     private static ConfigService configService;
 
@@ -52,6 +52,9 @@ public class ConfigService {
 
     public static void main(String[] args){
         ConfigService configService = ConfigService.getInstance();
+        for(int i = 0; i < 100; i++){
+            System.out.println(new Random().nextInt(2));
+        }
 //        Properties p = configService.ipConfig();
 //        System.out.println(p);
 //        String x = (String) p.get("1335");

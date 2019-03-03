@@ -21,9 +21,9 @@ public class Sandbox {
 //            List<String> sellers = Arrays.asList("kk", "dskfjd");
 //            System.out.println(peerStub);
 //            peerStub.lookup(item, hopCount, path, sellers);
-            IPeer B = Peer.build(localRegistry, "B", PeerType.SELLER, ItemType.FISH);
-            IPeer C = Peer.build(localRegistry, "C", PeerType.SELLER, ItemType.FISH);
-            IPeer D = Peer.build(localRegistry, "D", PeerType.SELLER, ItemType.BOARS);
+            IPeer B = Peer.build(localRegistry, "B", PeerType.SELLER, 0, ItemType.BOARS);
+            IPeer C = Peer.build(localRegistry, "C", PeerType.SELLER, 0, ItemType.BOARS);
+            IPeer D = Peer.build(localRegistry, "D", PeerType.SELLER, 0, ItemType.FISH);
             System.out.println(B);
             System.out.println(C);
             System.out.println(D);

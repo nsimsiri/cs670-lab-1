@@ -49,11 +49,7 @@ public class StackMerger {
         }
 
         LookupInfo info = this.map.get(lookup);
-        if (info.count == 1){
-            removeLookup(lookup);
-        } else {
-            info.count--;
-        }
+        info.count--;
         return info.count;
     }
 
@@ -75,12 +71,21 @@ public class StackMerger {
         info.potentialSellers.addAll(sellers);
     }
 
+    public synchronized Integer getTotalCount(Lookup lookup){
+        if (!this.map.containsKey(lookup)){
+            throw new IllegalArgumentException("Look up not found " + lookup);
+        }
+        return this.map.get(lookup).totalCount;
+    }
+
     public static class LookupInfo {
         public Integer count;
+        public Integer totalCount;
         public HashSet<String> potentialSellers;
         public LookupInfo(Integer count){
             this.count = count;
             this.potentialSellers = new HashSet<>();
+            this.totalCount = count;
         }
 
         @Override
@@ -112,6 +117,7 @@ public class StackMerger {
         System.out.println(sm + " " + sm.getLookupCount(a));
         sm.decrementLookup(a);
         System.out.println(sm);
+        sm.removeLookup(a);
         sm.createLookup(b, 3);
         sm.addLookupSellers(b, Arrays.asList("a","b"));
         System.out.println(sm);
