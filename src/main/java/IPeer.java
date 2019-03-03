@@ -8,17 +8,17 @@ public interface IPeer extends Remote{
      * 128.119.202.183
      * this procedure should search the network; all matching sellers respond to this
      * message with their IDs. The hopcount is decremented at each hop and the message is discarded when it reaches 0.
-     * @param productName
+     * @param lookup
      * @param hopCount
      */
-    void lookup(ItemType productName, int hopCount,
+    void lookup(Lookup lookup, int hopCount,
                         Stack<String> path, List<String> potentialSellers) throws RemoteException;
 
     /***
      * this is a reply message with the peerID of the seller
      * @param sellerID
      */
-    public void reply(String sellerID, ItemType productName, Stack<String> stack,
+    public void reply(String sellerID, Lookup lookup, Stack<String> stack,
                       List<String> potentialSellers) throws RemoteException;
 
     /***

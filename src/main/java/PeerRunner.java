@@ -14,7 +14,6 @@ public class PeerRunner {
 		Registry localRegistry = pns.getLocalRegistry();
 		for(String name : peerNamesOnThisMachine){
 			PeerType type = new Random().nextInt(2) % 2 == 0 ? PeerType.SELLER : PeerType.BUYER;
-			Peer.build(localRegistry, name, type);
 		}
 
 

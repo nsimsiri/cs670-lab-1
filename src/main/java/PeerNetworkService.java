@@ -44,21 +44,33 @@ public class PeerNetworkService {
      * @return
      */
     public Set<String> getNeighbors(String myName){
-        /*
-        ConfigService configService = ConfigService.getInstance();
+        return this.graphconfigmap.get(myName);
+
+        /* Stubs start here */
+//        return oneBuyerAllSellers(myName);
+    }
+
+    public Set<String> oneBuyerAllSellers(String myName){
 
         List<String> neighborStrings = new ArrayList<>();
-        Map<String, String> stub = new HashMap<>();
-        stub.put("A", "B");
-        stub.put("B", "C");
-        stub.put("C", "D");
-        String x = stub.getOrDefault(myName, null);
-        if (x!=null) neighborStrings.add(x);
 
-          neighbors_map = configService.edgeList();
-          return neighbors_map.get(myName);
-        */
-        return this.graphconfigmap.get(myName);
+        // test case 1 - line
+//        Map<String, String> stub = new HashMap<>();
+//        stub.put("A", "B"); stub.put("B", "C"); stub.put("C", "D");
+//        String x = stub.getOrDefault(myName, null);
+//        if (x!=null) neighborStrings.add(x);
+
+        // test case 1 - star
+//        Map<String, List<String>> stub = new HashMap<>();
+//        stub.put("A", Arrays.asList("B", "C", "D"));
+//        neighborStrings = stub.getOrDefault(myName,new ArrayList<>());
+
+        Map<String, List<String>> stub = new HashMap<>();
+        stub.put("A", Arrays.asList("B", "C"));
+        stub.put("B", Arrays.asList("E", "F"));
+        stub.put("C", Arrays.asList("G", "H"));
+        neighborStrings = stub.getOrDefault(myName,new ArrayList<>());
+        return new HashSet<>(neighborStrings);
     }
 
     public IPeer getPeerByName(String peerName){

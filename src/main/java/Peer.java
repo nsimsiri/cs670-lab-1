@@ -1,15 +1,10 @@
 
 import java.io.IOException;
-
-import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.time.Instant;
 
 /***
  * Both Server and Client
@@ -29,71 +24,172 @@ public class Peer implements IPeer {
         this.name = name;
         this.logger = new Logger(name);
         this.peerType = peerType;
+        this.merger = new StackMerger();
         if (peerType.equals(PeerType.SELLER)){
             this.inventory = new Inventory(item);
         }
     }
 
     /***
-     *
-     * PROBLEM: we need to "Merge" all the replies from path, because we need.
      * - spawn a
      *
      */
     @Override
-    public void lookup(ItemType productName, int hopCount, Stack<String> path,
+    public void lookup(Lookup lookup, int hopCount, Stack<String> path,
                                             List<String> potentialSellers) throws RemoteException {
 
-        logger.info("%s lookup %s %s %s %s", this.toString(), productName, hopCount, path, potentialSellers);
+        ItemType productName = lookup.getProductName();
+        logger.info("%s lookup %s hop=%s path=%s sellers=%s", this.toString(), productName, hopCount, path, potentialSellers);
+
         PeerNetworkService pns = PeerNetworkService.getInstance();
         String previousNodeName = path.isEmpty() ? new String() : path.peek();
 
-
+        // as we hope along the network, we collect our potential sellers.
         if (this.peerType.equals(PeerType.SELLER) && this.inventory.isSellingItem(productName)){
             potentialSellers.add(this.name);
         }
+
+        // we get our neighbors from PeerNetworkService which encodes our network's topology.
         Set<String> neighborNames = pns.getNeighbors(this.name);
+
+        // we begin our look-up search logic
         if (hopCount <= 0 || neighborNames.size() == 0) {
-            //last seller, reply.
-            this.reply(this.name, productName, path, potentialSellers);
+            // last hop count or no more neighbor means we traverse
+            // the path we took back to the buyer with reply to previous peer
+            if (previousNodeName.isEmpty()) return; //
+            IPeer neighbor = pns.getPeerByName(previousNodeName);
+            path.pop();
+            Runnable task = () -> {
+                try {
+                    neighbor.reply(this.name, lookup, path, potentialSellers);
+                } catch(Exception e){
+                    logger.warning("Thread");
+                    e.printStackTrace();
+                }
+            };
+            Thread thread = new Thread(task);
+            thread.start();
         } else {
+            // we still have hops, so we hop to our neighbors
+
+            // this node has been visited before, we will not traverse and our hop ends here.
+            synchronized (this.merger){
+                if (this.merger.containsLookup(lookup)){
+//                    logger.info("has visited " + this.name + " - " + lookup);
+                    return;
+                }
+            }
+            // keep track of who we've traveled along so far.
             path.push(this.name);
-            logger.info("looking up neighbors " + neighborNames);
+//            logger.info("looking up neighbors " + neighborNames);
+
+            // we keep track of this visited node for the current look-up (i.e buyer, product, time)
+            // and keep count of how many neighbors we will be receiving replies from to gather sellers
+            // which is implemented in reply()
+            synchronized (this.merger){
+
+                this.merger.createLookup(lookup, neighborNames.size());
+//                logger.info("new visit " + this.name + " - " + lookup + " - neigh - " + neighborNames.size() + " - merger- " + this.merger);
+            }
+
+            // asynchronous traversal of each neighbors, decrementing the count as we go and tracking state as we go.
             for(String neighborName : neighborNames) {
-                logger.info("searching " + neighborName);
+//                logger.info("searching " + neighborName);
                 if (previousNodeName.equals(neighborName)) continue;
 
                 IPeer neighbor = pns.getPeerByName(neighborName);
                 if (neighbor == null) continue;
 
-                neighbor.lookup(productName, hopCount - 1, path, potentialSellers);
-            }
+                Runnable task = () -> {
+                    try {
+                        neighbor.lookup(lookup, hopCount - 1, path, potentialSellers);
+                    } catch(Exception e){
+                        logger.warning("Thread");
+                        e.printStackTrace();
+                    }
+                };
 
+                Thread thread = new Thread(task);
+                thread.start();
+            }
         }
     }
 
     /***
-     * Seller sells to buyer
+     * This method backtracks the look-ups, initially triggered on the final look-up hop.
+     * However, we won't reply until the look-up on neighbors of this peer has finished.
+     * We use the this.merger to keep track of who has arrived, and aggregate the sellers as they come.
+     * We use reentrant synchronization to help us guarantee mergers' concurrent .
      * @param sellerID
      */
     @Override
-    public void reply(String sellerID, ItemType productName, Stack<String> stack,
+    public void reply(String sellerID, Lookup lookup, Stack<String> stack,
                                    List<String> potentialSellers) throws RemoteException {
-        logger.info("REPLY %s %s %s %s", sellerID, productName, stack, potentialSellers);
-        PeerNetworkService pns = PeerNetworkService.getInstance();
-        if (stack.isEmpty()){
-            logger.info("REPLY - empty, will attempt to buy");
-            // we're the buyer, call buy
-            int nSellers = potentialSellers.size();
-            if (nSellers == 0) return;
-            int randIdx = new Random().nextInt(nSellers);
-            String sellerCandidateID = potentialSellers.get(randIdx);
-            IPeer seller = pns.getPeerByName(sellerCandidateID);
-            seller.buy(this.name, productName);
-        } else {
-            String previousPeerID = stack.pop();
-            IPeer previousPeer = pns.getPeerByName(previousPeerID);
-            previousPeer.reply(sellerID, productName, stack, potentialSellers);
+        synchronized (this.merger){
+            // a peer has returned, decrement.
+            this.merger.decrementLookup(lookup);
+
+            ItemType productName = lookup.getProductName();
+
+            PeerNetworkService pns = PeerNetworkService.getInstance();
+            int count = this.merger.getLookupCount(lookup);
+            logger.info("REPLY %s %s path=%s sellers=%s -- count: %s/%s", sellerID, productName, stack,
+                    potentialSellers, count, this.merger.getTotalCount(lookup));
+            logger.info("--merger: " + this.merger);
+            this.merger.addLookupSellers(lookup, potentialSellers);
+            if (count <= 0){
+                // all forked messages have returned
+                if (stack.isEmpty()){
+                    // stack empty means, we're the buyer, call buy
+                    Set<String> sellers = this.merger.getLookupSellers(lookup); // get other stored-sellers
+
+                    logger.info("REPLY(1) - At initial buyer peer, all neighbors have returned - buy from=" + sellers);
+
+                    int nSellers = sellers.size();
+
+                    // case no sellers
+                    if (nSellers == 0) return;
+
+                    // case have seller
+
+                    int randIdx = new Random().nextInt(nSellers);
+                    List<String> sellersList = new ArrayList<>(sellers);
+                    String sellerCandidateID = sellersList.get(randIdx);
+                    IPeer seller = pns.getPeerByName(sellerCandidateID);
+//                    logger.warning("BUYING CHECK nSellers=%s sellers=%s randomized=%s", nSellers, sellersList, randIdx);
+                    seller.buy(this.name, productName);
+                    this.merger.removeLookup(lookup);
+                } else {
+                    // stack is not empty, thus not a seller. We will wait for our merger's count for the lookup to be 0
+                    // not last seller, will pass message along after we wait for lookup.
+                    String previousPeerID = stack.pop();
+                    logger.info("REPLY(2) - At middleman, all neighbors have returned - initiate pass-back to " +  previousPeerID);
+
+                    IPeer previousPeer = pns.getPeerByName(previousPeerID);
+//                    logger.warning(previousPeer);
+
+                    Set<String> storedPotentialSellers = this.merger.getLookupSellers(lookup);
+                    List<String> _storedPotentialSellers = new ArrayList<>(storedPotentialSellers);
+//                    logger.warning("replying with sellers %s and stack %s", _storedPotentialSellers, stack);
+
+                    Runnable task = () -> {
+                        try {
+                            previousPeer.reply(sellerID, lookup, stack, _storedPotentialSellers);
+                        } catch(Exception e){
+                            logger.warning("Thread");
+                            e.printStackTrace();
+                        }
+                    };
+                    Thread thread = new Thread(task);
+                    thread.start();
+
+
+                }
+
+            } else {
+                // messages have not returned do nothing and our concurrent store.
+                logger.info("REPLY(3) - not all neighbors have returned - sellers=" + this.merger.getLookupSellers(lookup));
+            }
         }
     }
 
@@ -107,25 +203,36 @@ public class Peer implements IPeer {
         synchronized(this.inventory){
             if (this.inventory.isSellingItem(productName)){
                 this.inventory.take(productName);
-                logger.info("!! BOUGHT " + productName);
+                logger.info("!! BOUGHT " + productName + " now seller has " + this.inventory);
+            } else {
+                logger.info("%s no longer sold by %s", productName, this);
             }
         }
+    }
 
+    private Lookup buildLookup(String buyerID, ItemType productName){
+        Long timestamp = Instant.now().toEpochMilli();
+        Lookup lookup = new Lookup(buyerID, productName, timestamp);
+        return lookup;
     }
 
     public void runBuyer(){
         Runnable task = () -> {
             ConfigService configService = ConfigService.getInstance();
-            int hopCount = 10;
+            int hopCount = configService.getHopCount();
             Long delay = configService.getBuyerDelay(true);
-            logger.info("buyer START");
+//            logger.info("buyer START");
             while(true){
                 try {
+                    delay = new Double(delay * Math.random()).longValue() + 500L;
                     logger.info("sleep " + delay + " ms");
                     Thread.sleep(delay);
+
                     ItemType randomizedItem = ItemType.BOARS; //inventory.randomizeItemType();
-                    this.lookup(randomizedItem, 10, new Stack<>(), new ArrayList<>());
-//                    this.lookup();
+                    Lookup lookup = buildLookup(this.name, randomizedItem);
+
+                    this.lookup(lookup, hopCount, new Stack<>(), new ArrayList<>());
+
                 } catch (InterruptedException e){
                     logger.severe("- PEER BROKEN - " + e.getMessage());
                     e.printStackTrace();
@@ -134,9 +241,8 @@ public class Peer implements IPeer {
                     logger.warning("- PEER EXCEPTION, CONT.- " + e.getMessage());
                     e.printStackTrace();
                 }
+                break;
             }
-            logger.info("buyer END");
-
         };
 
         try {
@@ -163,25 +269,23 @@ public class Peer implements IPeer {
         return PeerType.SELLER;
     }
 
-
-    public static Peer build(Registry registry, String name, PeerType peerType, ItemType sellingItem){
+    public static Peer build(Registry registry, String name, PeerType peerType, int port, ItemType sellingItem){
         Peer server = null;
         try {
             peerType = peerType == null ? getRandomPeerType() : peerType;
-            server = new Peer(name, peerType, sellingItem);
-            IPeer serverStub = (IPeer) UnicastRemoteObject.exportObject(server, 0);
-//            String hardName = String.format("//128.119.202.183/"+name);
+            server = null;
+            if (peerType.equals(peerType.BUYER)){
+                server = new Peer(name, peerType, null);
+            } else {
+                server = new Peer(name, peerType, sellingItem);
+            }
+
+            IPeer serverStub = (IPeer) UnicastRemoteObject.exportObject(server, port);
             staticLogger.info("starting peer... " + server);
             registry.bind(name, serverStub);
             staticLogger.info(name + " STARTED");
 
-            if (peerType.equals(peerType.BUYER)){
-//                serverStub.lookup(ItemType.BOARS, 1, new Stack<>(), new ArrayList<>());
-                server.runBuyer();
-            }
-
         } catch (Exception e){
-
             e.printStackTrace();
             staticLogger.severe(e.getMessage());
         } finally{
@@ -189,8 +293,8 @@ public class Peer implements IPeer {
         }
     }
 
-    public static Peer build(Registry registry, String name, PeerType peerType){
-        return build(registry, name, peerType, null);
+    public static Peer build(Registry registry, String name, PeerType peerType, int port){
+        return build(registry, name, peerType, port, null);
     }
 
     public String getName() throws RemoteException{
@@ -198,10 +302,10 @@ public class Peer implements IPeer {
     }
 
     public static void main(String[] args) throws RemoteException, IOException {
-//        Properties p = new Properties();
         PeerNetworkService pns = PeerNetworkService.getInstance();
         Registry registry = pns.getLocalRegistry();
-        Peer.build(registry, "A", PeerType.BUYER);
+        Peer peer = Peer.build(registry, "A", PeerType.BUYER, 0);
+        peer.runBuyer();
 
 
     }

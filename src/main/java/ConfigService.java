@@ -4,7 +4,7 @@ import java.util.*;
 public class ConfigService {
     private static final Integer INVENTORY_COUNT = 2;
     private static final Long BUYER_DELAY = 3000L;
-    private static final Integer HOP_COUNT = 10;
+    private static final Integer HOP_COUNT = 2;
 
     private static ConfigService configService;
 
@@ -97,12 +97,6 @@ public class ConfigService {
         System.out.println(config.get("1")[0]);
         Map<String,HashSet<String>> config2 = configService.edgeList();
         System.out.println(config2.get("5"));
-//        System.out.println(System.getProperty("user.dir"));
-
-//        Properties p = configService.ipConfig();
-//        System.out.println(p);
-//        String x = (String) p.get("1335");
-//        System.out.println
 
     }
 }
