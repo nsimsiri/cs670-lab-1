@@ -81,7 +81,7 @@ public class Peer implements IPeer {
             // this node has been visited before, we will not traverse and our hop ends here.
             synchronized (this.merger){
                 if (this.merger.containsLookup(lookup)){
-//                    logger.info("has visited " + this.name + " - " + lookup);
+                    logger.info("has visited " + this.name + " - " + lookup);
                     return;
                 }
             }
@@ -95,7 +95,7 @@ public class Peer implements IPeer {
             synchronized (this.merger){
 
                 this.merger.createLookup(lookup, neighborNames.size());
-//                logger.info("new visit " + this.name + " - " + lookup + " - neigh - " + neighborNames.size() + " - merger- " + this.merger);
+                logger.info("new visit " + this.name + " - " + lookup + " - neigh - " + neighborNames.size() + " - merger- " + this.merger);
             }
 
             // asynchronous traversal of each neighbors, decrementing the count as we go and tracking state as we go.
@@ -140,8 +140,9 @@ public class Peer implements IPeer {
 
             PeerNetworkService pns = PeerNetworkService.getInstance();
             int count = this.merger.getLookupCount(lookup);
-//            logger.info("REPLY %s %s path=%s sellers=%s -- count: %s/%s", sellerID, productName, stack,
-//                    potentialSellers, count, this.merger.getTotalCount(lookup));
+            logger.info("REPLY %s %s path=%s sellers=%s -- count: %s/%s", sellerID, productName, stack,
+                    potentialSellers, count, this.merger.getTotalCount(lookup));
+            logger.info("--merger: " + this.merger);
             this.merger.addLookupSellers(lookup, potentialSellers);
             if (count <= 0){
                 // all forked messages have returned
@@ -149,7 +150,7 @@ public class Peer implements IPeer {
                     // stack empty means, we're the buyer, call buy
                     Set<String> sellers = this.merger.getLookupSellers(lookup); // get other stored-sellers
 
-//                    logger.info("REPLY(1) - At initial buyer peer, all neighbors have returned - buy from=" + sellers);
+                    logger.info("REPLY(1) - At initial buyer peer, all neighbors have returned - buy from=" + sellers);
 
                     int nSellers = sellers.size();
 
@@ -169,7 +170,7 @@ public class Peer implements IPeer {
                     // stack is not empty, thus not a seller. We will wait for our merger's count for the lookup to be 0
                     // not last seller, will pass message along after we wait for lookup.
                     String previousPeerID = stack.pop();
-//                    logger.info("REPLY(2) - At middleman, all neighbors have returned - initiate pass-back to " +  previousPeerID);
+                    logger.info("REPLY(2) - At middleman, all neighbors have returned - initiate pass-back to " +  previousPeerID);
 
                     IPeer previousPeer = pns.getPeerByName(previousPeerID);
 //                    logger.warning(previousPeer);
@@ -194,7 +195,7 @@ public class Peer implements IPeer {
 
             } else {
                 // messages have not returned do nothing and our concurrent store.
-//                logger.info("REPLY(3) - not all neighbors have returned ");
+                logger.info("REPLY(3) - not all neighbors have returned - sellers=" + this.merger.getLookupSellers(lookup));
 //                this.merger.addLookupSellers(lookup, potentialSellers);
 
             }
@@ -213,7 +214,9 @@ public class Peer implements IPeer {
         synchronized(this.inventory){
             if (this.inventory.isSellingItem(productName)){
                 this.inventory.take(productName);
-                logger.info("!! BOUGHT " + productName + "now seller has " + this.inventory);
+                logger.info("!! BOUGHT " + productName + " now seller has " + this.inventory);
+            } else {
+                logger.info("%s no longer sold by %s", productName, this);
             }
         }
     }

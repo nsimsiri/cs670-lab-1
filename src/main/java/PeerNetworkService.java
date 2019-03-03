@@ -45,15 +45,19 @@ public class PeerNetworkService {
     public Set<String> _getNeighbors(String myName){
 
         List<String> neighborStrings = new ArrayList<>();
-        Map<String, String> stub = new HashMap<>();
+
         // test case 1 - line
-        stub.put("A", "B"); stub.put("B", "C"); stub.put("C", "D");
+//        Map<String, String> stub = new HashMap<>();
+//        stub.put("A", "B"); stub.put("B", "C"); stub.put("C", "D");
+//        String x = stub.getOrDefault(myName, null);
+//        if (x!=null) neighborStrings.add(x);
 
         // test case 1 - star
-//        stub.put("A", "B"); stub.put("A", "C"); stub.put("A", "D");
+        Map<String, List<String>> stub = new HashMap<>();
+        stub.put("A", Arrays.asList("B", "C", "D"));
+        neighborStrings = stub.getOrDefault(myName,new ArrayList<>());
 
-        String x = stub.getOrDefault(myName, null);
-        if (x!=null) neighborStrings.add(x);
+
         return new HashSet<>(neighborStrings);
 
     }
@@ -73,11 +77,12 @@ public class PeerNetworkService {
     }
 
     public static void main(String[] args) throws Exception{
-//        PeerNetworkService pns = PeerNetworkService.getInstance();
-//        Set<String> x = pns.getNeighbors("A");
-//
-//        System.out.println(x);
-        System.out.println("".isEmpty());
+        PeerNetworkService pns = PeerNetworkService.getInstance();
+        Set<String> x = pns.getNeighbors("A");
+        Set<String> y = pns.getNeighbors("B");
+
+        System.out.println(x);
+        System.out.println(y);
     }
 
 
