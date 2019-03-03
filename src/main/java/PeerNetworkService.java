@@ -1,5 +1,7 @@
-import java.lang.reflect.Array;
-import java.rmi.AlreadyBoundException;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -140,13 +142,14 @@ public class PeerNetworkService {
 
     public IPeer getPeerByName(String peerName){
         try {
-//            String[] rmi_array = this.ipconfigmap.get(peerName);
-//            String host = rmi_array[0];
-//            int port = Integer.parseInt(rmi_array[1]);
-//            Registry registry = LocateRegistry.getRegistry(host,port);
-//            IPeer peer = (IPeer) registry.lookup(peerName);
+            String[] rmi_array = this.ipconfigmap.get(peerName);
+            System.out.println();
+            String host = rmi_array[0];
+            int port = Integer.parseInt(rmi_array[1]);
 
-            IPeer peer = (IPeer) this.localRegistry.lookup(peerName);
+            Registry registry = LocateRegistry.getRegistry(host,port);
+
+            IPeer peer = (IPeer) registry.lookup(peerName);
             return peer;
         } catch (Exception e){
             logger.severe(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
@@ -159,17 +162,31 @@ public class PeerNetworkService {
     }
 
     public List<String> getNamesOnThisMachine(){
-        return null;
+        String sep = File.separator;
+        String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%sMachineIP",
+                sep,sep, sep, sep);
+        ArrayList<String> nameList = new ArrayList<>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            String machineip = br.readLine();
+            for (Map.Entry<String, String[]> entry : this.ipconfigmap.entrySet()) {
+                if(entry.getValue()[0].equals(machineip)){
+                    nameList.add(entry.getKey());
+                }
+            }
+        }
+        catch(Exception e){
+         e.printStackTrace();
+        }
+
+        return nameList;
     }
 
     public static void main(String[] args) throws Exception{
         PeerNetworkService pns = PeerNetworkService.getInstance();
-//        Set<String> x = pns.getNeighbors("A");
-//        System.out.println(x);
 
-//        pns.undirectedLine("A");
-//        pns.undirectedTree("A");
-        pns.undirectedStar("A");
+        Set<String> x = pns.getNeighbors("5");
+        System.out.println(x);
     }
 
 
