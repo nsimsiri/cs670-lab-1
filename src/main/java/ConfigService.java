@@ -1,5 +1,10 @@
 import java.io.*;
 import java.util.*;
+/**
+This class is a singleton object for reading in configuration files and  setting static values to be used in other classes.
+ *Includes buyer delay, inventory count, and hop count. The graph structure and ip addresses/ports are read in using a path
+ * string, which can be changed to run different config files.
+*/
 
 public class ConfigService {
     private static final Integer INVENTORY_COUNT = 2;

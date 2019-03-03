@@ -79,9 +79,11 @@ public class PeerNetworkService {
     public IPeer getPeerByName(String peerName){
         try {
             String[] rmi_array = this.ipconfigmap.get(peerName);
+            System.out.println();
             String host = rmi_array[0];
             int port = Integer.parseInt(rmi_array[1]);
             Registry registry = LocateRegistry.getRegistry(host,port);
+            System.out.println(registry);
             IPeer peer = (IPeer) registry.lookup(peerName);
             return peer;
         } catch (Exception e){
