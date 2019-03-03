@@ -39,10 +39,10 @@ public class PeerNetworkService {
      * @return
      */
     public Set<String> getNeighbors(String myName){
-       return _getNeighbors(myName);
+       return oneBuyerAllSellers(myName);
     }
 
-    public Set<String> _getNeighbors(String myName){
+    public Set<String> oneBuyerAllSellers(String myName){
 
         List<String> neighborStrings = new ArrayList<>();
 
@@ -53,13 +53,16 @@ public class PeerNetworkService {
 //        if (x!=null) neighborStrings.add(x);
 
         // test case 1 - star
+//        Map<String, List<String>> stub = new HashMap<>();
+//        stub.put("A", Arrays.asList("B", "C", "D"));
+//        neighborStrings = stub.getOrDefault(myName,new ArrayList<>());
+
         Map<String, List<String>> stub = new HashMap<>();
-        stub.put("A", Arrays.asList("B", "C", "D"));
+        stub.put("A", Arrays.asList("B", "C"));
+        stub.put("B", Arrays.asList("E", "F"));
+        stub.put("C", Arrays.asList("G", "H"));
         neighborStrings = stub.getOrDefault(myName,new ArrayList<>());
-
-
         return new HashSet<>(neighborStrings);
-
     }
 
     public IPeer getPeerByName(String peerName){

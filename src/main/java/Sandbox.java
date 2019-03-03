@@ -27,12 +27,16 @@ public class Sandbox {
             IPeer E = Peer.build(localRegistry, "E", PeerType.SELLER, 0, ItemType.BOARS);
             IPeer F = Peer.build(localRegistry, "F", PeerType.SELLER, 0, ItemType.BOARS);
             IPeer G = Peer.build(localRegistry, "G", PeerType.SELLER, 0, ItemType.FISH);
+            IPeer H = Peer.build(localRegistry, "H", PeerType.SELLER, 0, ItemType.FISH);
+
             System.out.println(B);
             System.out.println(C);
             System.out.println(D);
             System.out.println(E);
             System.out.println(F);
             System.out.println(G);
+            System.out.println(H);
+
         } catch (Exception e){
             e.printStackTrace();
         }
