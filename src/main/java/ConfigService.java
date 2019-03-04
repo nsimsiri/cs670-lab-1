@@ -47,6 +47,7 @@ public class ConfigService {
             BufferedReader br = new BufferedReader(new FileReader(this.filepath+"Build_Config"));
             String line;
             while ((line = br.readLine()) != null) {
+                //System.out.println(line);
                 String[] values = line.split(",");
                 String ipport = values[0] + values[1];
                 String vertex = values[2];
@@ -56,6 +57,7 @@ public class ConfigService {
         catch(Exception e){
                 e.printStackTrace();
             }
+
         return map;
         }
 
