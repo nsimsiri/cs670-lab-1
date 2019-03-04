@@ -56,7 +56,7 @@ public class Inventory {
         this.inventoryMap.put(itemType, ConfigService.getInstance().getInventoryCount());
     }
 
-    public ItemType randomizeItemType(){
+    public static ItemType randomizeItemType(){
         int i = new Random().nextInt(Inventory.productList.size());
         return Inventory.productList.get(i);
     }

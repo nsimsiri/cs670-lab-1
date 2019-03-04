@@ -16,8 +16,6 @@ public class PeerNetworkService {
     public Map<String, String[]> ipconfigmap;
     public Map<String, HashSet<String>> graphconfigmap;
     private PeerNetworkService() throws RemoteException {
-//        Registry remoteRegistry = LocateRegistry.getRegistry("edlab-ip", Registry.REGISTRY_PORT);
-//        Registry localRegistry = LocateRegistry.getRegistry(Registry.REGISTRY_PORT);
         Registry registry = null;
         try {
             registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
@@ -27,8 +25,8 @@ public class PeerNetworkService {
             this.localRegistry = registry;
         }
         ConfigService config = ConfigService.getInstance();
-//        this.ipconfigmap = config.ipConfig();
-//        this.graphconfigmap = config.edgeList();
+        this.ipconfigmap = config.ipConfig();
+        this.graphconfigmap = config.edgeList();
     }
 
     private Registry localRegistry;
@@ -48,7 +46,7 @@ public class PeerNetworkService {
      */
     public Set<String> getNeighbors(String myName){
         Set<String> out = null;
-//        out = this.graphconfigmap.get(myName);
+        out = this.graphconfigmap.get(myName);
 
         /* stub tests start here */
 //        out = line(myName);
@@ -58,7 +56,7 @@ public class PeerNetworkService {
 //        out = undirectedStar(myName);
 //        out = undirectedTree(myName);
 //        out = undirectedSmallGraph(myName);
-        out = undirectedGraph(myName);
+//        out = undirectedGraph(myName);
         /* stub tests ends */
 
         return out;
@@ -139,22 +137,19 @@ public class PeerNetworkService {
         return graph;
     }
 
-
     public IPeer getPeerByName(String peerName){
         try {
             String[] rmi_array = this.ipconfigmap.get(peerName);
-            System.out.println();
             String host = rmi_array[0];
             int port = Integer.parseInt(rmi_array[1]);
 
             Registry registry = LocateRegistry.getRegistry(host,port);
-
             IPeer peer = (IPeer) registry.lookup(peerName);
             return peer;
         } catch (Exception e){
             logger.severe(e.getMessage() + " " + Arrays.toString(e.getStackTrace()));
+            throw new IllegalArgumentException();
         }
-        return null;
     }
 
     public Registry getLocalRegistry(){
@@ -166,6 +161,7 @@ public class PeerNetworkService {
         String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%sMachineIP",
                 sep,sep, sep, sep);
         ArrayList<String> nameList = new ArrayList<>();
+        System.out.println(path);
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));
             String machineip = br.readLine();

@@ -11,7 +11,7 @@ public class ConfigService {
     private static final Long BUYER_DELAY = 3000L;
     private static final Integer HOP_COUNT = 10;
     private static final String sep = File.separator;
-    private static final String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%slocal_test%s",
+    private static final String path = System.getProperty("user.dir")+ String.format("%ssrc%smain%sresources%snatcha_local%s",
             sep,sep,sep,sep,sep);
 
     private static ConfigService configService;

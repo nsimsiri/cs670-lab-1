@@ -186,7 +186,7 @@ public class Peer implements IPeer {
 
             } else {
                 // messages have not returned do nothing and our concurrent store.
-                logger.info("REPLY(3) - not all neighbors have returned - sellers=" + this.merger.getLookupSellers(lookup));
+//                logger.info("REPLY(3) - not all neighbors have returned - sellers=" + this.merger.getLookupSellers(lookup));
             }
         }
     }
@@ -228,7 +228,7 @@ public class Peer implements IPeer {
                     logger.info("sleep " + delay + " ms");
                     Thread.sleep(delay);
 
-                    ItemType randomizedItem = ItemType.BOARS; //inventory.randomizeItemType();
+                    ItemType randomizedItem = inventory.randomizeItemType(); //ItemType.BOARS;
                     Lookup lookup = buildLookup(this.name, randomizedItem);
 
                     this.lookup(lookup, hopCount, new Stack<>(), new ArrayList<>());
@@ -241,7 +241,6 @@ public class Peer implements IPeer {
                     logger.warning("- PEER EXCEPTION, CONT.- " + e.getMessage());
                     e.printStackTrace();
                 }
-                break;
             }
         };
 
@@ -267,6 +266,10 @@ public class Peer implements IPeer {
             return PeerType.BUYER;
         }
         return PeerType.SELLER;
+    }
+
+    public PeerType getPeerType(){
+        return this.peerType;
     }
 
     public static Peer build(Registry registry, String name, PeerType peerType, int port, ItemType sellingItem){
